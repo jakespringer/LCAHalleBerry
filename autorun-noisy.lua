@@ -26,9 +26,9 @@ local stopTime         = math.ceil((numImages  * numEpochs) / nbatch) * displayP
 local writeStep        = displayPeriod; 
 local initialWriteTime = displayPeriod; 
 
-local inputPath        = "../dataset/faces_noisy.txt";
-local inputNamePath    = "../dataset/text_nothing.txt";
-local inputavg         = "../dataset/avg.txt";
+local inputPath        = "./dataset/faces_noisy.txt";
+local inputNamePath    = "./dataset/text_nothing.txt";
+local inputavg         = "./dataset/avg.txt";
 local outputPath       = "./" .. folderName .. "/";
 local checkpointPeriod = (displayPeriod * 50); -- How often to write checkpoints
 
