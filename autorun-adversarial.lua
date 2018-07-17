@@ -5,13 +5,13 @@ local pvDir = "/home/jspringer/OpenPV";
 
 local draw = false;
 
-local batchSize     = 8;
-local batchWidth    = 8;
-local threads       = 2;
+local batchSize     = 25;
+local batchWidth    = 25;
+local threads       = 1;
 local rows          = 1;
 local cols          = 1;
 
-local folderName    = "output-adversarial";
+local folderName    = "output-adversarial-hb";
 
 local nbatch           = batchSize;    -- Batch size of learning
 local nxSize           = 1;
@@ -21,12 +21,12 @@ local yPatchSize       = 16;    -- patch size for V1 to cover all y
 local stride           = 2;
 local displayPeriod    = 400;   -- Number of timesteps to find sparse approximation
 local numEpochs        = 1;     -- Number of times to run through dataset
-local numImages        = 1152;  -- Total number of images in dataset
+local numImages        = 75;  -- Total number of images in dataset
 local stopTime         = math.ceil((numImages  * numEpochs) / nbatch) * displayPeriod;
 local writeStep        = displayPeriod; 
 local initialWriteTime = displayPeriod; 
 
-local inputPath        = "./dataset/faces_adversarial.txt";
+local inputPath        = "/home/jspringer/Workspace/hb_classify/dataset/faces_adversarial.txt";
 local inputNamePath    = "./dataset/text_nothing.txt";
 local inputavg         = "./dataset/avg.txt";
 local outputPath       = "./" .. folderName .. "/";

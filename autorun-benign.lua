@@ -5,13 +5,14 @@ local pvDir = "/home/jspringer/OpenPV";
 
 local draw = false;
 
-local batchSize     = 8;
-local batchWidth    = 8;
-local threads       = 2;
+local batchSize     = 25;
+local batchWidth    = 25;
+local threads       = 1;
 local rows          = 1;
 local cols          = 1;
 
-local folderName    = "output-benign";
+local folderName    = "output-benign-hb-unlabeled";
+
 
 local nbatch           = batchSize;    -- Batch size of learning
 local nxSize           = 1;
@@ -19,15 +20,17 @@ local nySize           = 1;
 local xPatchSize       = 16;
 local yPatchSize       = 16;    -- patch size for V1 to cover all y
 local stride           = 2;
-local displayPeriod    = 400;   -- Number of timesteps to find sparse approximation
+local displayPeriod    = 800;   -- Number of timesteps to find sparse approximation
 local numEpochs        = 1;     -- Number of times to run through dataset
-local numImages        = 1152;  -- Total number of images in dataset
+local numImages        = 75;  -- Total number of images in dataset
 local stopTime         = math.ceil((numImages  * numEpochs) / nbatch) * displayPeriod;
 local writeStep        = displayPeriod; 
 local initialWriteTime = displayPeriod; 
 
-local inputPath        = "./dataset/faces_benign.txt";
-local inputNamePath    = "./dataset/text_nothing.txt";
+--local inputPath        = "/home/jspringer/Workspace/hb_classify/dataset/faces_benign.txt";
+--local inputNamePath    = "./dataset/text_nothing.txt";
+local inputPath        = "/home/jspringer/Workspace/LCAfaces/dataset/halleberry.txt";
+local inputNamePath    = "/home/jspringer/Workspace/LCAfaces/dataset/halleberrytext.txt";
 local inputavg         = "./dataset/avg.txt";
 local outputPath       = "./" .. folderName .. "/";
 local checkpointPeriod = (displayPeriod * 50); -- How often to write checkpoints
@@ -862,11 +865,12 @@ local pvParameters = {
       delay                               = {0.000000};
       initWeightsFile                     = nil;
    };
+
    InputToErrorText = {
       groupType = "RescaleConn";
       preLayerName                        = "InputText";
       postLayerName                       = "InputTextError";
-      channelCode                         = -1;
+      channelCode                         = 0;
       delay                               = {0.000000};
       scale                               = weightInit;
    };
@@ -875,7 +879,7 @@ local pvParameters = {
       groupType = "TransposeConn";
       preLayerName                        = "InputTextError";
       postLayerName                       = "T1";
-      channelCode                         = 0;
+      channelCode                         = -1;
       delay                               = {0.000000};
       convertRateToSpikeCount             = false;
       receiveGpu                          = true;
