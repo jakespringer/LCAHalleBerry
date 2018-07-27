@@ -1,3 +1,5 @@
 Checkpoint*
+CurrentCheckpoint/
 output*
 .ipynb_checkpoints/
+*.h5.*

@@ -11,7 +11,7 @@ local threads       = 2;
 local rows          = 1;
 local cols          = 1;
 
-local folderName    = "output-lfw";
+local folderName    = "output";
 
 local nbatch           = batchSize;    -- Batch size of learning
 local nxSize           = 1;
@@ -21,13 +21,13 @@ local yPatchSize       = 16;    -- patch size for V1 to cover all y
 local stride           = 2;
 local displayPeriod    = 400;   -- Number of timesteps to find sparse approximation
 local numEpochs        = 100;     -- Number of times to run through dataset
-local numImages        = 10586;  -- Total number of images in dataset
+local numImages        = 8471;  -- Total number of images in dataset
 local stopTime         = math.ceil((numImages  * numEpochs) / nbatch) * displayPeriod;
 local writeStep        = displayPeriod; 
 local initialWriteTime = displayPeriod; 
 
-local inputPath        = "/home/jspringer/Workspace/lfw_classify/dataset/training_faces.txt";
-local inputNamePath    = "/home/jspringer/Workspace/lfw_classify/dataset/training_text.txt";
+local inputPath        = "/home/jspringer/Workspace/lfw/full-dataset/faces_train.txt";
+local inputNamePath    = "/home/jspringer/Workspace/lfw/full-dataset/text_train.txt";
 local inputavg         = "./dataset/avg.txt";
 local outputPath       = "./" .. folderName .. "/";
 local checkpointPeriod = (displayPeriod * 50); -- How often to write checkpoints
@@ -875,7 +875,7 @@ local pvParameters = {
       groupType = "TransposeConn";
       preLayerName                        = "InputTextError";
       postLayerName                       = "T1";
-      channelCode                         = 0;
+      channelCode                         = -1;
       delay                               = {0.000000};
       convertRateToSpikeCount             = false;
       receiveGpu                          = true;

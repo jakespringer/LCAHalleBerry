@@ -5,14 +5,13 @@ local pvDir = "/home/jspringer/OpenPV";
 
 local draw = false;
 
-local batchSize     = 25;
-local batchWidth    = 25;
-local threads       = 1;
+local batchSize     = 24;
+local batchWidth    = 24;
+local threads       = 2;
 local rows          = 1;
 local cols          = 1;
 
-local folderName    = "output-benign-hb-unlabeled";
-
+local folderName    = "output-benign-lfw";
 
 local nbatch           = batchSize;    -- Batch size of learning
 local nxSize           = 1;
@@ -22,15 +21,13 @@ local yPatchSize       = 16;    -- patch size for V1 to cover all y
 local stride           = 2;
 local displayPeriod    = 800;   -- Number of timesteps to find sparse approximation
 local numEpochs        = 1;     -- Number of times to run through dataset
-local numImages        = 75;  -- Total number of images in dataset
+local numImages        = 2116;  -- Total number of images in dataset
 local stopTime         = math.ceil((numImages  * numEpochs) / nbatch) * displayPeriod;
 local writeStep        = displayPeriod; 
 local initialWriteTime = displayPeriod; 
 
---local inputPath        = "/home/jspringer/Workspace/hb_classify/dataset/faces_benign.txt";
---local inputNamePath    = "./dataset/text_nothing.txt";
-local inputPath        = "/home/jspringer/Workspace/LCAfaces/dataset/halleberry.txt";
-local inputNamePath    = "/home/jspringer/Workspace/LCAfaces/dataset/halleberrytext.txt";
+local inputPath        = "/home/jspringer/Workspace/lfw/full-dataset/faces_validate.txt";
+local inputNamePath    = "/home/jspringer/Workspace/lfw/full-dataset/text_validate.txt";
 local inputavg         = "./dataset/avg.txt";
 local outputPath       = "./" .. folderName .. "/";
 local checkpointPeriod = (displayPeriod * 50); -- How often to write checkpoints

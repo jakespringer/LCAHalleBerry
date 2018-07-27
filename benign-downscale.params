@@ -1,0 +1,883 @@
+debugParsing = true;
+HyPerCol "column" = {
+    errorOnNotANumber = false;
+    checkpointWriteDir = "./output-benign-downscale//Checkpoints";
+    checkpointWriteStepInterval = 20000;
+    checkpointWriteTriggerMode = "step";
+    outputPath = "./output-benign-downscale/";
+    deleteOlderCheckpoints = false;
+    dt = 1;
+    printParamsFilename = "Multimodal_Tutorial.params";
+    suppressNonplasticCheckpoints = true;
+    verifyWrites = false;
+    startTime = 0;
+    checkpointWrite = true;
+    stopTime = 2400;
+    nx = 1;
+    ny = 1;
+    nbatch = 25;
+    randomSeed = 1234567890;
+    writeProgressToErr = true;
+    progressInterval = 4000;
+};
+
+L2NormProbe "InputV1ErrorL2NormEnergyProbe" = {
+    energyProbe = "V2EnergyProbe";
+    probeOutputFile = "V1ErrorL2NormEnergyProbe.txt";
+    exponent = 2;
+    targetLayer = "V1Error";
+    coefficient = 0.5;
+    textOutputFlag = true;
+};
+
+RescaleLayer "InputVisionMeanSubtractedRescale" = {
+    targetMean = 0;
+    phase = 1;
+    writeStep = -1;
+    initialWriteTime = 400;
+    targetStd = 1;
+    rescaleMethod = "meanstd";
+    originalLayerName = "InputVisionMeanSubtracted";
+    nf = 3;
+    nxScale = 64;
+    nyScale = 64;
+};
+
+HyPerLCALayer "P1" = {
+    valueBC = 0;
+    timeConstantTau = 100;
+    AMin = 0;
+    selfInteract = true;
+    initializeFromCheckpointFlag = false;
+    initialWriteTime = 400;
+    AMax = infinity;
+    VThresh = 0.03;
+    adaptiveTimeScaleProbe = "AdaptiveTimeScales";
+    VWidth = 0;
+    AShift = 0.03;
+    phase = 2;
+    updateGpu = true;
+    writeStep = 400;
+    InitVType = "ConstantV";
+    nyScale = 1;
+    mirrorBCflag = false;
+    writeSparseValues = true;
+    valueV = 0.015;
+    nf = 512;
+    nxScale = 1;
+    sparseLayer = true;
+};
+
+CloneVLayer "CloneV2" = {
+    phase = 2;
+    writeStep = -1;
+    delay = [0.0];
+    originalLayerName = "V2";
+    nf = 128;
+    nxScale = 16;
+    nyScale = 16;
+};
+
+L2NormProbe "InputVisionErrorL2NormEnergyProbe" = {
+    energyProbe = "V1EnergyProbe";
+    probeOutputFile = "InputVisionErrorL2NormEnergyProbe.txt";
+    exponent = 2;
+    targetLayer = "InputVisionError";
+    coefficient = 0.5;
+    textOutputFlag = true;
+};
+
+MomentumConn "V2ToV1Error" = {
+    postLayerName = "V1Error";
+    pvpatchAccumulateType = "convolve";
+    initWeightsFile = "../Checkpoint0160000/V2ToV1Error_W.pvp";
+    momentumTau = 200;
+    triggerLayerName = "InputVision";
+    normalizeMethod = "normalizeL2";
+    wMaxInit = 1;
+    plasticityFlag = false;
+    sparseFraction = 0.9;
+    triggerOffset = 0;
+    strength = 1;
+    convertRateToSpikeCount = false;
+    updateGSynFromPostPerspective = false;
+    writeCompressedCheckpoints = false;
+    receiveGpu = false;
+    preLayerName = "V2";
+    shrinkPatches = false;
+    normalizeOnInitialize = true;
+    momentumMethod = "viscosity";
+    normalize_cutoff = 0;
+    delay = [0.0];
+    weightInitType = "FileWeight";
+    rMinX = 0;
+    wMinInit = -1;
+    momentumDecay = 0;
+    useMask = false;
+    normalizeOnWeightUpdate = true;
+    minL2NormTolerated = 0;
+    normalizeFromPostPerspective = false;
+    nyp = 8;
+    numAxonalArbors = 1;
+    rMinY = 0;
+    dWMax = 10;
+    writeStep = -1;
+    combineWeightFiles = false;
+    normalizeArborsIndividually = false;
+    nonnegativeConstraintFlag = false;
+    sharedWeights = true;
+    nxp = 8;
+    channelCode = -1;
+    initializeFromCheckpointFlag = false;
+    useListOfArborFiles = false;
+    selfFlag = false;
+};
+
+IdentConn "V2ReconToV2Error" = {
+    preLayerName = "V2P1Recon";
+    postLayerName = "V2Error";
+    delay = [0.0];
+    channelCode = 1;
+};
+
+IdentConn "AvgToDiff" = {
+    preLayerName = "InputAverage";
+    postLayerName = "InputVisionMeanSubtracted";
+    delay = [0.0];
+    channelCode = 1;
+};
+
+ColumnEnergyProbe "V1EnergyProbe" = {
+    textOutputFlag = true;
+    probeOutputFile = "V1EnergyProbe.txt";
+};
+
+IdentConn "ReconToErrorVision" = {
+    preLayerName = "InputVisionRecon";
+    postLayerName = "InputVisionError";
+    delay = [0.0];
+    channelCode = 1;
+};
+
+HyPerLCALayer "V1" = {
+    valueBC = 0;
+    timeConstantTau = 100;
+    AMin = 0;
+    selfInteract = true;
+    initializeFromCheckpointFlag = false;
+    initialWriteTime = 400;
+    AMax = infinity;
+    VThresh = 0.015;
+    adaptiveTimeScaleProbe = "AdaptiveTimeScales";
+    VWidth = 0;
+    AShift = 0.015;
+    phase = 2;
+    updateGpu = true;
+    writeStep = 400;
+    InitVType = "ConstantV";
+    nyScale = 32;
+    mirrorBCflag = false;
+    writeSparseValues = true;
+    valueV = 0.015;
+    nf = 128;
+    nxScale = 32;
+    sparseLayer = true;
+};
+
+ANNLayer "V2applyThresh" = {
+    valueBC = 0;
+    timeConstantTau = 100;
+    AMin = 0;
+    selfInteract = true;
+    initializeFromCheckpointFlag = false;
+    AShift = 0.015;
+    AMax = infinity;
+    VThresh = 0.015;
+    VWidth = 0;
+    phase = 5;
+    writeStep = -1;
+    InitVType = "ConstantV";
+    nyScale = 16;
+    mirrorBCflag = false;
+    writeSparseValues = true;
+    valueV = 0.015;
+    nf = 128;
+    nxScale = 16;
+    sparseLayer = true;
+};
+
+L1NormProbe "P1L1NormEnergyProbe" = {
+    energyProbe = "P1EnergyProbe";
+    coefficient = 0.025;
+    targetLayer = "P1";
+    probeOutputFile = "P1L1NormEnergyProbe.txt";
+    textOutputFlag = true;
+};
+
+HyPerLayer "InputVisionMeanSubtracted" = {
+    valueBC = 0;
+    phase = 1;
+    initializeFromCheckpointFlag = false;
+    writeStep = -1;
+    initialWriteTime = 400;
+    updateGpu = false;
+    nyScale = 64;
+    InitVType = "ZeroV";
+    mirrorBCflag = false;
+    nf = 3;
+    nxScale = 64;
+    sparseLayer = false;
+};
+
+ColumnEnergyProbe "P1EnergyProbe" = {
+    energyProbe = "V1EnergyProbe";
+    textOutputFlag = true;
+    probeOutputFile = "P1EnergyProbe.txt";
+};
+
+L1NormProbe "V2L1NormEnergyProbe" = {
+    energyProbe = "V2EnergyProbe";
+    coefficient = 0.025;
+    targetLayer = "V2";
+    probeOutputFile = "V2L1NormEnergyProbe.txt";
+    textOutputFlag = true;
+};
+
+L1NormProbe "V1L1NormEnergyProbe" = {
+    energyProbe = "V1EnergyProbe";
+    coefficient = 0.025;
+    targetLayer = "V1";
+    probeOutputFile = "V1L1NormEnergyProbe.txt";
+    textOutputFlag = true;
+};
+
+IdentConn "V2P1ReconToThresh" = {
+    preLayerName = "V2P1Recon";
+    postLayerName = "V2applyThresh";
+    delay = [0.0];
+    channelCode = 0;
+};
+
+IdentConn "V2ErrorToV2" = {
+    preLayerName = "V2Error";
+    postLayerName = "V2";
+    delay = [0.0];
+    channelCode = 1;
+};
+
+HyPerLayer "P1VisionRecon" = {
+    valueBC = 0;
+    phase = 3;
+    initializeFromCheckpointFlag = false;
+    writeStep = 400;
+    initialWriteTime = 400;
+    updateGpu = false;
+    nyScale = 64;
+    InitVType = "ZeroV";
+    mirrorBCflag = false;
+    nf = 3;
+    nxScale = 64;
+    sparseLayer = false;
+};
+
+ANNLayer "V1V2applyThresh" = {
+    valueBC = 0;
+    timeConstantTau = 100;
+    AMin = 0;
+    selfInteract = true;
+    initializeFromCheckpointFlag = false;
+    AShift = 0.015;
+    AMax = infinity;
+    VThresh = 0.015;
+    VWidth = 0;
+    phase = 5;
+    writeStep = -1;
+    InitVType = "ConstantV";
+    nyScale = 32;
+    mirrorBCflag = false;
+    writeSparseValues = true;
+    valueV = 0.015;
+    nf = 128;
+    nxScale = 32;
+    sparseLayer = true;
+};
+
+CloneConn "P1VisionReconConn" = {
+    preLayerName = "V1V2ThreshRecon";
+    postLayerName = "P1VisionRecon";
+    pvpatchAccumulateType = "convolve";
+    delay = [0.0];
+    originalConnName = "V1ToError";
+    convertRateToSpikeCount = false;
+    updateGSynFromPostPerspective = false;
+    writeCompressedCheckpoints = false;
+    selfFlag = false;
+    channelCode = 0;
+    receiveGpu = false;
+};
+
+HyPerConn "P1ToInputVision" = {
+    postLayerName = "InputVision";
+    pvpatchAccumulateType = "convolve";
+    initializeFromCheckpointFlag = false;
+    triggerLayerName = "InputVision";
+    normalizeMethod = "none";
+    plasticityFlag = false;
+    triggerOffset = 0;
+    convertRateToSpikeCount = false;
+    updateGSynFromPostPerspective = false;
+    writeCompressedCheckpoints = false;
+    receiveGpu = false;
+    preLayerName = "P1";
+    shrinkPatches = false;
+    normalize_cutoff = 0;
+    delay = [0.0];
+    weightInitType = "UniformWeight";
+    nfp = 3;
+    weightInit = 0;
+    useMask = false;
+    rMinY = 0;
+    minL2NormTolerated = 0;
+    normalizeFromPostPerspective = false;
+    numAxonalArbors = 1;
+    nyp = 64;
+    dWMax = 1;
+    writeStep = 800;
+    combineWeightFiles = false;
+    rMinX = 0;
+    nonnegativeConstraintFlag = false;
+    sharedWeights = true;
+    nxp = 64;
+    channelCode = -1;
+    initialWriteTime = 400;
+    useListOfArborFiles = false;
+    selfFlag = false;
+};
+
+ImageLayer "InputAverage" = {
+    inputPath = "/home/jspringer/Average.png";
+    useInputBCflag = false;
+    initializeFromCheckpointFlag = true;
+    initialWriteTime = 400;
+    jitterFlag = 0;
+    batchMethod = "byImage";
+    autoResizeFlag = false;
+    writeFrameToTimestamp = true;
+    offsetX = 0;
+    resetToStartOnLoop = false;
+    displayPeriod = 400;
+    padValue = 0;
+    normalizeLuminanceFlag = false;
+    normalizeStdDev = false;
+    phase = 0;
+    updateGpu = false;
+    writeStep = -1;
+    inverseFlag = false;
+    mirrorBCflag = true;
+    offsetAnchor = "tl";
+    nyScale = 64;
+    offsetY = 0;
+    nf = 3;
+    nxScale = 64;
+    sparseLayer = false;
+};
+
+IdentConn "V1V2ReconToThreshL2" = {
+    preLayerName = "V1V2Recon";
+    postLayerName = "V1V2applyThresh";
+    delay = [0.0];
+    channelCode = 0;
+};
+
+CloneVLayer "CloneV1" = {
+    phase = 2;
+    writeStep = -1;
+    delay = [0.0];
+    originalLayerName = "V1";
+    nf = 128;
+    nxScale = 32;
+    nyScale = 32;
+};
+
+IdentConn "V1ConeToV1Error" = {
+    preLayerName = "CloneV1";
+    postLayerName = "V1Error";
+    delay = [0.0];
+    channelCode = 0;
+};
+
+HyPerLayer "InputVisionReconPlusAvg" = {
+    valueBC = 0;
+    phase = 3;
+    initializeFromCheckpointFlag = false;
+    writeStep = 400;
+    initialWriteTime = 400;
+    updateGpu = false;
+    nyScale = 64;
+    InitVType = "ZeroV";
+    mirrorBCflag = false;
+    nf = 3;
+    nxScale = 64;
+    sparseLayer = false;
+};
+
+HyPerLayer "V1V2Recon" = {
+    valueBC = 0;
+    phase = 3;
+    initializeFromCheckpointFlag = false;
+    writeStep = -1;
+    initialWriteTime = 400;
+    updateGpu = false;
+    nyScale = 32;
+    InitVType = "ZeroV";
+    mirrorBCflag = false;
+    nf = 128;
+    nxScale = 32;
+    sparseLayer = false;
+};
+
+HyPerLayer "V1Error" = {
+    valueBC = 0;
+    phase = 1;
+    initializeFromCheckpointFlag = false;
+    writeStep = -1;
+    updateGpu = false;
+    nyScale = 32;
+    InitVType = "ZeroV";
+    mirrorBCflag = false;
+    nf = 128;
+    nxScale = 32;
+    sparseLayer = false;
+};
+
+CloneConn "V2ToV1Recon" = {
+    preLayerName = "V2";
+    postLayerName = "V1V2Recon";
+    pvpatchAccumulateType = "convolve";
+    delay = [0.0];
+    originalConnName = "V2ToV1Error";
+    convertRateToSpikeCount = false;
+    updateGSynFromPostPerspective = false;
+    writeCompressedCheckpoints = false;
+    selfFlag = false;
+    channelCode = 0;
+    receiveGpu = false;
+};
+
+L2NormProbe "InputV2ErrorL2NormEnergyProbe" = {
+    energyProbe = "P1EnergyProbe";
+    probeOutputFile = "V2ErrorL2NormEnergyProbe.txt";
+    exponent = 2;
+    targetLayer = "V2Error";
+    coefficient = 0.5;
+    textOutputFlag = true;
+};
+
+MomentumConn "P1ToV2Error" = {
+    postLayerName = "V2Error";
+    pvpatchAccumulateType = "convolve";
+    initWeightsFile = "../Checkpoint0160000/P1ToV2Error_W.pvp";
+    momentumTau = 200;
+    triggerLayerName = "InputVision";
+    normalizeMethod = "normalizeL2";
+    wMaxInit = 1;
+    plasticityFlag = false;
+    sparseFraction = 0.9;
+    triggerOffset = 0;
+    strength = 1;
+    convertRateToSpikeCount = false;
+    updateGSynFromPostPerspective = false;
+    writeCompressedCheckpoints = false;
+    receiveGpu = false;
+    preLayerName = "P1";
+    shrinkPatches = false;
+    normalizeOnInitialize = true;
+    momentumMethod = "viscosity";
+    normalize_cutoff = 0;
+    delay = [0.0];
+    weightInitType = "FileWeight";
+    rMinX = 0;
+    wMinInit = -1;
+    momentumDecay = 0;
+    useMask = false;
+    normalizeOnWeightUpdate = true;
+    minL2NormTolerated = 0;
+    normalizeFromPostPerspective = false;
+    nyp = 16;
+    numAxonalArbors = 1;
+    rMinY = 0;
+    dWMax = 10;
+    writeStep = -1;
+    combineWeightFiles = false;
+    normalizeArborsIndividually = false;
+    nonnegativeConstraintFlag = false;
+    sharedWeights = true;
+    nxp = 16;
+    channelCode = -1;
+    initializeFromCheckpointFlag = false;
+    useListOfArborFiles = false;
+    selfFlag = false;
+};
+
+CloneConn "V2ToV1ThreshRecon" = {
+    preLayerName = "V2applyThresh";
+    postLayerName = "V1V2ThreshRecon";
+    pvpatchAccumulateType = "convolve";
+    delay = [0.0];
+    originalConnName = "V2ToV1Error";
+    convertRateToSpikeCount = false;
+    updateGSynFromPostPerspective = false;
+    writeCompressedCheckpoints = false;
+    selfFlag = false;
+    channelCode = 0;
+    receiveGpu = false;
+};
+
+CloneConn "P1ToV2Recon" = {
+    preLayerName = "P1";
+    postLayerName = "V2P1Recon";
+    pvpatchAccumulateType = "convolve";
+    delay = [0.0];
+    originalConnName = "P1ToV2Error";
+    convertRateToSpikeCount = false;
+    updateGSynFromPostPerspective = false;
+    writeCompressedCheckpoints = false;
+    selfFlag = false;
+    channelCode = 0;
+    receiveGpu = false;
+};
+
+ColumnEnergyProbe "V2EnergyProbe" = {
+    energyProbe = "V1EnergyProbe";
+    textOutputFlag = true;
+    probeOutputFile = "V2EnergyProbe.txt";
+};
+
+AdaptiveTimeScaleProbe "AdaptiveTimeScales" = {
+    writeTimeScales = true;
+    targetName = "V1EnergyProbe";
+    probeOutputFile = "AdaptiveTimeScales.txt";
+    triggerOffset = 0;
+    triggerLayerName = "InputVision";
+    growthFactor = 0.01;
+    textOutputFlag = true;
+    tauFactor = 0.1;
+    baseMin = 0.01;
+    baseMax = 0.1;
+};
+
+TransposeConn "ErrorToV1" = {
+    preLayerName = "InputVisionError";
+    postLayerName = "V1";
+    pvpatchAccumulateType = "convolve";
+    originalConnName = "V1ToError";
+    delay = [0.0];
+    gpuGroupIdx = -1;
+    selfFlag = false;
+    convertRateToSpikeCount = false;
+    updateGSynFromPostPerspective = true;
+    writeCompressedCheckpoints = false;
+    writeStep = -1;
+    channelCode = 0;
+    receiveGpu = true;
+};
+
+IdentConn "V1ReconToV1Error" = {
+    preLayerName = "V1V2Recon";
+    postLayerName = "V1Error";
+    delay = [0.0];
+    channelCode = 1;
+};
+
+HyPerLayer "V2P1Recon" = {
+    valueBC = 0;
+    phase = 3;
+    initializeFromCheckpointFlag = false;
+    writeStep = 400;
+    initialWriteTime = 400;
+    updateGpu = false;
+    nyScale = 16;
+    InitVType = "ZeroV";
+    mirrorBCflag = false;
+    nf = 128;
+    nxScale = 16;
+    sparseLayer = false;
+};
+
+HyPerLCALayer "V2" = {
+    valueBC = 0;
+    timeConstantTau = 100;
+    AMin = 0;
+    selfInteract = true;
+    initializeFromCheckpointFlag = false;
+    initialWriteTime = 400;
+    AMax = infinity;
+    VThresh = 0.015;
+    adaptiveTimeScaleProbe = "AdaptiveTimeScales";
+    VWidth = 0;
+    AShift = 0.015;
+    phase = 2;
+    updateGpu = true;
+    writeStep = 400;
+    InitVType = "ConstantV";
+    nyScale = 16;
+    mirrorBCflag = false;
+    writeSparseValues = true;
+    valueV = 0.015;
+    nf = 128;
+    nxScale = 16;
+    sparseLayer = true;
+};
+
+IdentConn "V1ErrorToV1" = {
+    preLayerName = "V1Error";
+    postLayerName = "V1";
+    delay = [0.0];
+    channelCode = 1;
+};
+
+RescaleConn "AvgToOutputPlusAvg" = {
+    preLayerName = "InputAverage";
+    postLayerName = "InputVisionReconPlusAvg";
+    scale = -1;
+    delay = [0.0];
+    channelCode = -1;
+};
+
+HyPerLayer "V2Error" = {
+    valueBC = 0;
+    phase = 2;
+    initializeFromCheckpointFlag = false;
+    writeStep = -1;
+    updateGpu = false;
+    nyScale = 16;
+    InitVType = "ZeroV";
+    mirrorBCflag = false;
+    nf = 128;
+    nxScale = 16;
+    sparseLayer = false;
+};
+
+CloneConn "V1V2VisionReconConn" = {
+    preLayerName = "V1V2applyThresh";
+    postLayerName = "V1V2VisionRecon";
+    pvpatchAccumulateType = "convolve";
+    delay = [0.0];
+    originalConnName = "V1ToError";
+    convertRateToSpikeCount = false;
+    updateGSynFromPostPerspective = false;
+    writeCompressedCheckpoints = false;
+    selfFlag = false;
+    channelCode = 0;
+    receiveGpu = false;
+};
+
+RescaleConn "InputToErrorVision" = {
+    preLayerName = "InputVisionMeanSubtractedRescale";
+    postLayerName = "InputVisionError";
+    scale = 0.036084391824352;
+    delay = [0.0];
+    channelCode = 0;
+};
+
+TransposeConn "V1ErrorToV2" = {
+    preLayerName = "V1Error";
+    postLayerName = "V2";
+    pvpatchAccumulateType = "convolve";
+    originalConnName = "V2ToV1Error";
+    delay = [0.0];
+    gpuGroupIdx = -1;
+    selfFlag = false;
+    convertRateToSpikeCount = false;
+    updateGSynFromPostPerspective = true;
+    writeCompressedCheckpoints = false;
+    writeStep = -1;
+    channelCode = 0;
+    receiveGpu = true;
+};
+
+HyPerLayer "V1V2VisionRecon" = {
+    valueBC = 0;
+    phase = 3;
+    initializeFromCheckpointFlag = false;
+    writeStep = 400;
+    initialWriteTime = 400;
+    updateGpu = false;
+    nyScale = 64;
+    InitVType = "ZeroV";
+    mirrorBCflag = false;
+    nf = 3;
+    nxScale = 64;
+    sparseLayer = false;
+};
+
+ImageLayer "InputVision" = {
+    inputPath = "/home/jspringer/Workspace/LCAHalleBerry/analysis/deep-models/halleberry/dataset-downscale/faces_benign.txt";
+    useInputBCflag = false;
+    initializeFromCheckpointFlag = true;
+    initialWriteTime = 400;
+    jitterFlag = 0;
+    batchMethod = "byImage";
+    autoResizeFlag = false;
+    writeFrameToTimestamp = true;
+    offsetX = 0;
+    resetToStartOnLoop = false;
+    displayPeriod = 400;
+    padValue = 0;
+    normalizeLuminanceFlag = false;
+    normalizeStdDev = false;
+    phase = 0;
+    updateGpu = false;
+    writeStep = 400;
+    inverseFlag = false;
+    mirrorBCflag = true;
+    offsetAnchor = "tl";
+    nyScale = 64;
+    offsetY = 0;
+    nf = 3;
+    nxScale = 64;
+    sparseLayer = false;
+};
+
+IdentConn "V2ConeToV2Error" = {
+    preLayerName = "CloneV2";
+    postLayerName = "V2Error";
+    delay = [0.0];
+    channelCode = 0;
+};
+
+IdentConn "ReconToOutputPlusAvg" = {
+    preLayerName = "InputVisionRecon";
+    postLayerName = "InputVisionReconPlusAvg";
+    delay = [0.0];
+    channelCode = 0;
+};
+
+CloneConn "V1ToRecon" = {
+    preLayerName = "V1";
+    postLayerName = "InputVisionRecon";
+    pvpatchAccumulateType = "convolve";
+    delay = [0.0];
+    originalConnName = "V1ToError";
+    convertRateToSpikeCount = false;
+    updateGSynFromPostPerspective = false;
+    writeCompressedCheckpoints = false;
+    selfFlag = false;
+    channelCode = 0;
+    receiveGpu = false;
+};
+
+HyPerLayer "InputVisionRecon" = {
+    valueBC = 0;
+    phase = 3;
+    initializeFromCheckpointFlag = false;
+    writeStep = -1;
+    initialWriteTime = 400;
+    updateGpu = false;
+    nyScale = 64;
+    InitVType = "ZeroV";
+    mirrorBCflag = false;
+    nf = 3;
+    nxScale = 64;
+    sparseLayer = false;
+};
+
+HyPerLayer "InputVisionError" = {
+    valueBC = 0;
+    phase = 3;
+    initializeFromCheckpointFlag = false;
+    writeStep = 400;
+    initialWriteTime = 400;
+    updateGpu = false;
+    nyScale = 64;
+    InitVType = "ZeroV";
+    mirrorBCflag = false;
+    nf = 3;
+    nxScale = 64;
+    sparseLayer = false;
+};
+
+MomentumConn "V1ToError" = {
+    postLayerName = "InputVisionError";
+    pvpatchAccumulateType = "convolve";
+    initWeightsFile = "../Checkpoint0160000/V1ToError_W.pvp";
+    momentumTau = 200;
+    triggerLayerName = "InputVision";
+    normalizeMethod = "normalizeL2";
+    wMaxInit = 1;
+    plasticityFlag = false;
+    sparseFraction = 0.9;
+    triggerOffset = 0;
+    strength = 1;
+    convertRateToSpikeCount = false;
+    updateGSynFromPostPerspective = false;
+    writeCompressedCheckpoints = false;
+    receiveGpu = false;
+    preLayerName = "V1";
+    shrinkPatches = false;
+    normalizeOnInitialize = true;
+    momentumMethod = "viscosity";
+    normalize_cutoff = 0;
+    delay = [0.0];
+    weightInitType = "FileWeight";
+    rMinX = 0;
+    wMinInit = -1;
+    momentumDecay = 0;
+    useMask = false;
+    normalizeOnWeightUpdate = true;
+    minL2NormTolerated = 0;
+    normalizeFromPostPerspective = false;
+    nyp = 8;
+    numAxonalArbors = 1;
+    rMinY = 0;
+    dWMax = 10;
+    writeStep = -1;
+    combineWeightFiles = false;
+    normalizeArborsIndividually = false;
+    nonnegativeConstraintFlag = false;
+    sharedWeights = true;
+    nxp = 8;
+    channelCode = -1;
+    initializeFromCheckpointFlag = false;
+    useListOfArborFiles = false;
+    selfFlag = false;
+};
+
+IdentConn "InputToDiff" = {
+    preLayerName = "InputVision";
+    postLayerName = "InputVisionMeanSubtracted";
+    delay = [0.0];
+    channelCode = 0;
+};
+
+TransposeConn "V2ErrorToP1" = {
+    preLayerName = "V2Error";
+    postLayerName = "P1";
+    pvpatchAccumulateType = "convolve";
+    originalConnName = "P1ToV2Error";
+    delay = [0.0];
+    gpuGroupIdx = -1;
+    selfFlag = false;
+    convertRateToSpikeCount = false;
+    updateGSynFromPostPerspective = true;
+    writeCompressedCheckpoints = false;
+    writeStep = -1;
+    channelCode = 0;
+    receiveGpu = true;
+};
+
+HyPerLayer "V1V2ThreshRecon" = {
+    valueBC = 0;
+    phase = 3;
+    initializeFromCheckpointFlag = false;
+    writeStep = -1;
+    initialWriteTime = 400;
+    updateGpu = false;
+    nyScale = 32;
+    InitVType = "ZeroV";
+    mirrorBCflag = false;
+    nf = 128;
+    nxScale = 32;
+    sparseLayer = false;
+};
+
